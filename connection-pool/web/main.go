@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/batTrung/todos/connection-pool/models"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -23,12 +24,12 @@ var poolCount int64 = 0
 var dsn = "postgres://db_user:db_user_password@localhost:5433/db_name?sslmode=disable"
 var query = "SELECT id, name, price, description FROM products limit 1000"
 
-func scanProducts(rows *sql.Rows) ([]*model.Product, error) {
+func scanProducts(rows *sql.Rows) ([]*models.Product, error) {
 	defer rows.Close()
 
-	products := make([]*model.Product, 0)
+	products := make([]*models.Product, 0)
 	for rows.Next() {
-		var p model.Product
+		var p models.Product
 		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Description)
 		if err != nil {
 			return nil, err
@@ -82,7 +83,7 @@ func main() {
 		elapsed := time.Since(startTime).Microseconds()
 		normalCount++
 		normalTime += elapsed
-		c.JSON(http.StatusOK, model.Response{Elapsed: elapsed, Average: float64(normalTime / normalCount), Products: products})
+		c.JSON(http.StatusOK, models.Response{Elapsed: elapsed, Average: float64(normalTime / normalCount), Products: products})
 	})
 
 	/*
@@ -108,7 +109,7 @@ func main() {
 		elapsed := time.Since(startTime).Microseconds()
 		newCount++
 		newTime += elapsed
-		c.JSON(http.StatusOK, model.Response{Elapsed: elapsed, Average: float64(newTime / newCount), Products: products})
+		c.JSON(http.StatusOK, models.Response{Elapsed: elapsed, Average: float64(newTime / newCount), Products: products})
 	})
 
 	/*
@@ -130,7 +131,7 @@ func main() {
 		elapsed := time.Since(startTime).Microseconds()
 		poolCount++
 		poolTime += elapsed
-		c.JSON(http.StatusOK, model.Response{Elapsed: elapsed, Average: float64(poolTime / poolCount), Products: products})
+		c.JSON(http.StatusOK, models.Response{Elapsed: elapsed, Average: float64(poolTime / poolCount), Products: products})
 	})
 
 	// Start the HTTP server
