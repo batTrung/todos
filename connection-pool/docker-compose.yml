@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  
+  db:
+    build:
+      context: ./db
+      dockerfile: ./Dockerfile
+    container_name: 'connection_pool_db'
+    volumes:
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+      - postgres_data:/var/lib/postgresql/data/
+    restart: unless-stopped
+    env_file:
+      - ./db/.env
+  web:
+    build:
+      context: ./web
+      dockerfile: ./Dockerfile
+    container_name: 'connection_pool_web'
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./web/:/app/
+    depends_on:
+      - db
+    env_file:
+      - ./web/.env
+
+volumes:
+  postgres_data:
